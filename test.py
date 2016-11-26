@@ -91,8 +91,19 @@ m = mat(w)
 pr = []
 for i in range(len(w)):
     pr.append([1])
+
 pr = mat(pr)
 for i in range(100):
     pr = 0.15 + 0.85 * m * pr
 
-print pr
+rank_dict = {}
+for i in range(len(pr)):
+    rank_dict[i] = pr[i][0]
+
+#print rank_dict
+
+num_dict = sorted(rank_dict.items(), key=lambda items : items[1],reverse=True)
+#print num_dict
+
+for i in range(3):
+    print sentences[num_dict[i][0]]
