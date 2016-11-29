@@ -1,29 +1,14 @@
 # -*- coding:utf-8 -*-
 '''
-Created on 2016-11-29
+Created on 2016-11-28
 
 @author: Godning
 '''
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-
-import jieba,codecs,math,pymysql
 from utils import *
-
-def get_seg_list(text):
-    stop_words_file = "stopwords.txt"
-    stop_words = []
-
-    for word in codecs.open(stop_words_file, 'r', 'utf-8', 'ignore'):
-        stop_words.append(word.strip())
-
-    sentences = text.split(u'。')
-    seg_list = []
-    for item in sentences:
-        seg_list.append([word for word in jieba.cut(item, cut_all=False) if word not in stop_words])
-        # seg_list.append(jieba.cut(item, cut_all=False))
-    return seg_list, sentences
+import pymysql,math
 
 
 def sen_similarity_calc(seg_list, threshold):
@@ -33,7 +18,7 @@ def sen_similarity_calc(seg_list, threshold):
         for j in range(len(seg_list)):
             common = [word for word in seg_list[i] if word in seg_list[j]]
             ans = len(common) / (math.log(len(seg_list[i]))+math.log(len(seg_list[j])))
-            if ans>threshold:
+            if ans > threshold:
                 w[i].append(1)
             else:
                 w[i].append(0)
@@ -69,12 +54,13 @@ def get_summary(seg_list, sentences, threshold):
     num_dict = sorted(rank_dict.items(), key=lambda items: items[1], reverse=True)
     # print num_dict
     summary = u""
-    for i in range(3):
+    for i in range(2):
         summary += sentences[num_dict[i][0]]+u"。"
     return summary
 
 if __name__ == '__main__':
-    text = get_content(3)
+    text = get_content(453)
     seg_list, contences = get_seg_list(text)
     summary = get_summary(seg_list, contences, threshold=0.6)
     print summary
+    db_close()
