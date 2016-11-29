@@ -5,9 +5,6 @@ Created on 2016-11-23
 @author: Godning
 '''
 import pymysql.cursors
-from datetime import date
-
-from config import config
 import urllib2
 from bs4 import BeautifulSoup
 import socket
@@ -15,6 +12,9 @@ import httplib
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
+from config import config
+from similary import get_similary
+
 
 class Spider(object):
     """Spider"""
@@ -42,7 +42,7 @@ class Spider(object):
                 urls.append("http://m.sohu.com" + link.get('href'))
         return urls
 
-def getNews(url):
+def getNews(url, news_type):
     """
     return: News Object
     """
@@ -59,15 +59,13 @@ def getNews(url):
     soup = BeautifulSoup(html, 'html.parser')
     try:
         news_title = soup.h1.string.decode('utf-8')
-        news_type = soup.find('div', class_='article-info clearfix').contents[1].span.string
-        news_time = soup.find('div', class_='article-info clearfix').contents[3].contents[0]
     except AttributeError,e:
         return None
 
     for news in soup.select('p.para'):
         xinwen += news.get_text().decode('utf-8')
 
-    news_object = News(source=url,title=news_title,time=news_time,content=xinwen,type=news_type)
+    news_object = News(source=url, title=news_title, content=xinwen, type=news_type)
 
     return news_object
 
@@ -80,10 +78,9 @@ class News(object):
     content:content of news 文章内容
     type:type of news    文章类型
     """
-    def __init__(self, source, title, time, content, type):
+    def __init__(self, source, title, content, type):
         self.source = source
         self.title = title
-        self.time = time
         self.content = content
         self.type = type
 
@@ -92,12 +89,8 @@ def write_data(connection, news):
     try:
         with connection.cursor() as cursor:
             # 执行sql语句，插入记录
-            year = 2016
-            dd = news.time.split(' ')[0].split('-')
-            month = int(dd[0])
-            day = int(dd[1])
-            sql = 'INSERT INTO news (source, title, time, content, type) VALUES (%s, %s, %s, %s, %s)'
-            cursor.execute(sql, (news.source, news.title, date(year,month,day),news.content,news.type))
+            sql = 'INSERT INTO news (source, title, content, type) VALUES (%s, %s, %s, %s)'
+            cursor.execute(sql, (news.source, news.title, news.content, news.type))
         # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
         connection.commit()
     except Exception, e:
@@ -108,15 +101,20 @@ def main():
     # Connect to the database
     connection = pymysql.connect(**config)
     # file = open('test.txt', 'a')
-    for i in range(38, 50):
+    n_type = {2:u"新闻", 3:u"体育", 4:u"娱乐", 5:u"财经", 6:u"时尚",7:u"科技", 8:u"军事", 9:u"星座"}
+    """
+    2:：新闻，3：体育，4：娱乐，5：财经，6：时尚，7：科技，8：军事，9：星座
+    """
+    for i in range(2, 9):
         for j in range(1, 5):
             url = "http://m.sohu.com/cr/" + str(i) + "/?page=" + str(j)
+            news_type = n_type[i]
             print url
             s = Spider(url)
             for newsUrl in s.getNextUrls():
-                news = (connection, getNews(newsUrl))
+                news = getNews(newsUrl, news_type)
                 if news:
-                    write_data(news=news)
+                    write_data(connection=connection, news=news)
                     print "---------------------------"
     # file.close()
 
@@ -124,4 +122,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
