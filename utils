@@ -4,7 +4,7 @@ Created on 2016-11-29
 
 @author: Godning
 '''
-import sys,pymysql
+import sys,pymysql,jieba,codecs
 reload(sys)
 sys.setdefaultencoding('utf8')
 from config import config
@@ -28,5 +28,26 @@ def get_content(id):
         connection.commit()
 
     finally:
-        connection.close()
+        pass
     return result['content']
+
+
+def db_close():
+    connection.close()
+
+
+def get_seg_list(text):
+    stop_words_file = "stopwords.txt"
+    stop_words = []
+
+    for word in codecs.open(stop_words_file, 'r', 'utf-8', 'ignore'):
+        stop_words.append(word.strip())
+
+    sentences = text.split(u'。')
+    seg_list = []
+    for item in sentences:
+        words = [word for word in jieba.cut(item, cut_all=False) if word not in stop_words]
+        if len(words) != 0:
+            seg_list.append(words)
+        # seg_list.append(jieba.cut(item, cut_all=False))
+    return seg_list, sentences
