@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 '''
-Created on 2016-11-28
+Created on 2016-11-29
 
 @author: Godning
 '''
@@ -9,28 +9,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 import jieba,codecs,math,pymysql
-from config import config
-
-connection = pymysql.connect(**config)
-
-def get_content():
-    try:
-        with connection.cursor() as cursor:
-            # 执行sql语句，插入记录
-            sql = 'select * from news where id = 3'
-            cursor.execute(sql)
-        # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
-        result = cursor.fetchone()
-        # print(result)
-        # for key in result:
-        #    print result[key]
-        # s = SnowNLP(result['content'])
-        connection.commit()
-
-    finally:
-        connection.close()
-    return result['content']
-
+from utils import *
 
 def get_seg_list(text):
     stop_words_file = "stopwords.txt"
@@ -44,25 +23,25 @@ def get_seg_list(text):
     for item in sentences:
         seg_list.append([word for word in jieba.cut(item, cut_all=False) if word not in stop_words])
         # seg_list.append(jieba.cut(item, cut_all=False))
-    return seg_list,sentences
+    return seg_list, sentences
 
 
-def sen_similarity_calc(seg_list):
+def sen_similarity_calc(seg_list, threshold):
     w = []
     for i in range(len(seg_list)):
         w.append([])
         for j in range(len(seg_list)):
             common = [word for word in seg_list[i] if word in seg_list[j]]
             ans = len(common) / (math.log(len(seg_list[i]))+math.log(len(seg_list[j])))
-            if ans>0.6:
+            if ans>threshold:
                 w[i].append(1)
             else:
                 w[i].append(0)
     return w
 
 
-def get_summary(seg_list, sentences):
-    w = sen_similarity_calc(seg_list)
+def get_summary(seg_list, sentences, threshold):
+    w = sen_similarity_calc(seg_list, threshold)
     """
     for i in range(len(w)):
         for j in range(len(w[i])):
@@ -91,11 +70,11 @@ def get_summary(seg_list, sentences):
     # print num_dict
     summary = u""
     for i in range(3):
-        summary += sentences[num_dict[i][0]]
+        summary += sentences[num_dict[i][0]]+u"。"
     return summary
 
 if __name__ == '__main__':
-    text = get_content()
+    text = get_content(3)
     seg_list, contences = get_seg_list(text)
-    summary = get_summary(seg_list, contences)
+    summary = get_summary(seg_list, contences, threshold=0.6)
     print summary
