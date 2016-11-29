@@ -1,0 +1,32 @@
+# -*- coding:utf-8 -*-
+'''
+Created on 2016-11-29
+
+@author: Godning
+'''
+import sys,pymysql
+reload(sys)
+sys.setdefaultencoding('utf8')
+from config import config
+
+
+connection = pymysql.connect(**config)
+
+
+def get_content(id):
+    try:
+        with connection.cursor() as cursor:
+            # 执行sql语句，插入记录
+            sql = 'select * from news where id = '+str(id)
+            cursor.execute(sql)
+        # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
+        result = cursor.fetchone()
+        # print(result)
+        # for key in result:
+        #    print result[key]
+        # s = SnowNLP(result['content'])
+        connection.commit()
+
+    finally:
+        connection.close()
+    return result['content']
