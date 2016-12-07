@@ -4,7 +4,7 @@ Created on 2016-11-23
 
 @author: Godning
 '''
-import pymysql.cursors
+import pymysql
 import urllib2
 from bs4 import BeautifulSoup
 import socket
@@ -12,8 +12,8 @@ import httplib
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
+import codecs,jieba
 from config import config
-from similary import get_similary
 
 
 class Spider(object):
@@ -42,6 +42,59 @@ class Spider(object):
                 urls.append("http://m.sohu.com" + link.get('href'))
         return urls
 
+
+def get_seg_list(text):
+    stop_words_file = "stopwords.txt"
+    stop_words = [' ', '\n']
+
+    for word in codecs.open(stop_words_file, 'r', 'utf-8', 'ignore'):
+        stop_words.append(word.strip())
+
+    sentences = text.split(u'。')
+    seg_list = []
+    for item in sentences:
+        words = [word for word in jieba.cut(item, cut_all=False) if word not in stop_words]
+        if len(words) != 0:
+            seg_list.append(words)
+        # seg_list.append(jieba.cut(item, cut_all=False))
+    return seg_list, sentences
+
+
+def get_keyword_list(text):
+    tags = []
+    num = []
+    seg_list_tmp, sen = get_seg_list(text)
+    seg_list = []
+    for list in seg_list_tmp:
+            seg_list.extend(list)
+
+    for word in seg_list:
+        if word in tags and word != ' ':
+            index = tags.index(word)
+            num[index] += 1
+        else:
+            tags.append(word)
+            num.append(1)
+    for i in range(len(num)):
+        for j in range(len(num)):
+            if(num[i]>num[j]):
+                tmp = num[i]
+                num[i] = num[j]
+                num[j] = tmp
+                tmp = tags[i]
+                tags[i] = tags[j]
+                tags[j] = tmp
+    wordlist = []
+    try:
+        for i in range(6):
+            wordlist.append((tags[i],num[i]))
+    finally:
+        keyword_str = ""
+        for word, value in wordlist:
+            keyword_str += word + ':' + str(value) + ','
+        return keyword_str[:-1]
+
+
 def getNews(url, news_type):
     """
     return: News Object
@@ -64,8 +117,9 @@ def getNews(url, news_type):
 
     for news in soup.select('p.para'):
         xinwen += news.get_text().decode('utf-8')
+    if len(xinwen) <20: return None
+    news_object = News(source=url, title=news_title, content=xinwen, keywordlist=get_keyword_list(xinwen), type=news_type)
 
-    news_object = News(source=url, title=news_title, content=xinwen, type=news_type)
 
     return news_object
 
@@ -78,19 +132,20 @@ class News(object):
     content:content of news 文章内容
     type:type of news    文章类型
     """
-    def __init__(self, source, title, content, type):
+    def __init__(self, source, title, content, type, keywordlist):
         self.source = source
         self.title = title
         self.content = content
         self.type = type
+        self.keywordlist = keywordlist
 
 
 def write_data(connection, news):
     try:
         with connection.cursor() as cursor:
             # 执行sql语句，插入记录
-            sql = 'INSERT INTO news (source, title, content, type) VALUES (%s, %s, %s, %s)'
-            cursor.execute(sql, (news.source, news.title, news.content, news.type))
+            sql = 'INSERT INTO news (source, title, content, keyword, type) VALUES (%s, %s, %s, %s, %s)'
+            cursor.execute(sql, (news.source, news.title, news.content, news.keywordlist, news.type))
         # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
         connection.commit()
     except Exception, e:
@@ -122,3 +177,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
