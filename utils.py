@@ -9,12 +9,9 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from config import config
 
-
-connection = pymysql.connect(**config)
-
-
 def get_content(id):
     try:
+        connection = pymysql.connect(**config)
         with connection.cursor() as cursor:
             # 执行sql语句，插入记录
             sql = 'select * from news where id = '+str(id)
@@ -30,9 +27,6 @@ def get_content(id):
     finally:
         pass
     return result['content']
-
-
-def db_close():
     connection.close()
 
 
@@ -51,3 +45,4 @@ def get_seg_list(text):
             seg_list.append(words)
         # seg_list.append(jieba.cut(item, cut_all=False))
     return seg_list, sentences
+
