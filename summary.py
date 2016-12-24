@@ -59,8 +59,7 @@ def get_summary(seg_list, sentences, threshold):
     return summary
 
 if __name__ == '__main__':
-    text = get_content(453)
+    text = get_content(1653)
     seg_list, contences = get_seg_list(text)
     summary = get_summary(seg_list, contences, threshold=0.6)
     print summary
-    db_close()
