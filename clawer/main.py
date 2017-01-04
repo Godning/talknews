@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 import socket
 import httplib
 import sys
-from com.finley.exam.recSys import debug_mode
 reload(sys)
 sys.setdefaultencoding('utf8')
 import codecs,jieba
