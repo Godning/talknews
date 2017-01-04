@@ -7,8 +7,7 @@ Created on 2016-11-28
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-from utils import *
-import pymysql,math
+import math,codecs,jieba
 
 
 def sen_similarity_calc(seg_list, threshold):
@@ -23,6 +22,23 @@ def sen_similarity_calc(seg_list, threshold):
             else:
                 w[i].append(0)
     return w
+
+
+def get_seg_list(text):
+    stop_words_file = "stopwords.txt"
+    stop_words = []
+
+    for word in codecs.open(stop_words_file, 'r', 'utf-8', 'ignore'):
+        stop_words.append(word.strip())
+
+    sentences = text.split(u'。')
+    seg_list = []
+    for item in sentences:
+        words = [word for word in jieba.cut(item, cut_all=False) if word not in stop_words]
+        if len(words) != 0:
+            seg_list.append(words)
+        # seg_list.append(jieba.cut(item, cut_all=False))
+    return seg_list, sentences
 
 
 def get_summary(seg_list, sentences, threshold):
@@ -58,8 +74,16 @@ def get_summary(seg_list, sentences, threshold):
         summary += sentences[num_dict[i][0]]+u"。"
     return summary
 
+
+def summary(text= ""):
+
+    seg_list, sentences = get_seg_list(text)
+    return get_summary(seg_list, sentences, 0.7)
+
+
 if __name__ == '__main__':
-    text = get_content(1653)
+    #text = get_content(1653)
+    text = ""
     seg_list, contences = get_seg_list(text)
     summary = get_summary(seg_list, contences, threshold=0.6)
     print summary

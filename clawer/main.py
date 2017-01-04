@@ -10,10 +10,16 @@ from bs4 import BeautifulSoup
 import socket
 import httplib
 import sys
+from com.finley.exam.recSys import debug_mode
 reload(sys)
 sys.setdefaultencoding('utf8')
 import codecs,jieba
 from config import config
+
+
+'''Global variables'''
+global debug_mode
+debug_mode = True
 
 
 class Spider(object):
@@ -37,7 +43,8 @@ class Spider(object):
 
         soup = BeautifulSoup(html,'html.parser')
         for link in soup.find_all('a'):
-            print("http://m.sohu.com" + link.get('href'))
+            if debug_mode:
+                print("http://m.sohu.com" + link.get('href'))
             if link.get('href')[0] == '/':
                 urls.append("http://m.sohu.com" + link.get('href'))
         return urls
@@ -99,7 +106,8 @@ def getNews(url, news_type):
     """
     return: News Object
     """
-    print url
+    if debug_mode:
+        print url
     xinwen = ''
     request = urllib2.Request(url)
     request.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1; \
@@ -107,7 +115,8 @@ def getNews(url, news_type):
     try:
         html = urllib2.urlopen(request)
     except urllib2.HTTPError, e:
-        print e.code
+        if debug_mode:
+            print e.code
 
     soup = BeautifulSoup(html, 'html.parser')
     try:
@@ -149,7 +158,8 @@ def write_data(connection, news):
         # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
         connection.commit()
     except Exception, e:
-        print e
+        if debug_mode:
+            print e
 
 
 def main():
@@ -161,16 +171,18 @@ def main():
     2:：新闻，3：体育，4：娱乐，5：财经，6：时尚，7：科技，8：军事，9：星座
     """
     for i in range(2, 9):
-        for j in range(1, 5):
+        for j in range(1, 500):
             url = "http://m.sohu.com/cr/" + str(i) + "/?page=" + str(j)
             news_type = n_type[i]
-            print url
+            if debug_mode:
+                print url
             s = Spider(url)
             for newsUrl in s.getNextUrls():
                 news = getNews(newsUrl, news_type)
                 if news:
                     write_data(connection=connection, news=news)
-                    print "---------------------------"
+                    if debug_mode:
+                        print "---------------------------"
     # file.close()
 
     connection.close()
