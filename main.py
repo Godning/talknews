@@ -58,5 +58,6 @@ application = tornado.web.Application([
 ], **settings)
 
 if __name__ == "__main__":
+    recSys.global_init()
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
