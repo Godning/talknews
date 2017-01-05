@@ -37,7 +37,8 @@
   		var $a5 = $("<div/>").addClass('bubble bubble_default left').appendTo($a4);
   		var $a6 = $("<div/>").addClass('bubble_cont').appendTo($a5);
   		var $a7 = $("<div/>").addClass('plain').appendTo($a6);
-  		var $a8 = $("<pre/>").text(data).appendTo($a7);
+  		var $a8 = $("<pre/>").text(data.text).appendTo($a7);
+			$a8.wrap("<a style='text-decoration:None' href="+data.source+"></a>>");
 
   		var $a9 = $("<div/>").addClass('message me').appendTo('.box_bd');
   		var $a10 = $("<div/>").addClass('content').appendTo($a9);

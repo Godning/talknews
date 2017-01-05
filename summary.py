@@ -70,7 +70,7 @@ def get_summary(seg_list, sentences, threshold):
     num_dict = sorted(rank_dict.items(), key=lambda items: items[1], reverse=True)
     # print num_dict
     summary = u""
-    for i in range(2):
+    for i in range(min(len(num_dict), 2)):
         summary += sentences[num_dict[i][0]]+u"。"
     return summary
 

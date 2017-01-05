@@ -10,5 +10,10 @@
 * 前端：直接jquery了，不想加动画，。。。
 * 雏形有了，后续问题还很多，先写文档。。。找个时间再改改爬虫
 
-## demo
+## Demo
 ![Demo](https://github.com/Godning/talknews/blob/master/demo.png)
+
+## Bug
+* 爬虫不能识别异常url 
+* 推荐系统的准确性
+* 用户信息存储问题

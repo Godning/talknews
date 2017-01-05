@@ -15,7 +15,6 @@ session_id = 1
 class MainHandler(tornado.web.RequestHandler):
 
     def initialize(self):
-        #recSys.global_init()
         pass
 
     def set_default_headers(self):
@@ -37,9 +36,10 @@ class MainHandler(tornado.web.RequestHandler):
         global text
         cmd = self.get_argument("choice")
         #         text = summary.summary(recSys.interactive(user_id, cmd))
-        text = recSys.interactive(user_id, cmd)
+        text, source = recSys.interactive(user_id, cmd)
         #         print(user_id)
-        self.write(text)
+        #self.write(text)
+        self.finish({'text':text, 'source':source})
         #         if cmd == '0':
         #             self.write(u"其他新闻")
         #         else:
@@ -58,6 +58,6 @@ application = tornado.web.Application([
 ], **settings)
 
 if __name__ == "__main__":
-    recSys.global_init()
+    #recSys.global_init()
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
