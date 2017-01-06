@@ -30,7 +30,20 @@ ul, ol {
   
 a img, fieldset {  
     border: 0;  
-}  
+}
+
+a:link {
+        color: black;
+}
+a:visited {
+        color: black;
+}
+a:hover {
+        color: black;
+}
+a:active {
+        color: black;
+}
   
 article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary {  
     display: block;  

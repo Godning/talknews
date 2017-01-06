@@ -22,7 +22,26 @@
   <script src="static/jquery.js"></script>
   <script type="text/javascript">
   $(document).ready(function(){
-  	send('0');
+	  	var $l1 = $("<div/>").addClass('message').appendTo('.box_bd');
+  		var $l2 = $("<div/>").addClass('nickname time').text(new Date().toTimeString().slice(0,8)).appendTo($l1);
+  		var $l4 = $("<div/>").addClass('content').appendTo($l1);
+  		var $l5 = $("<div/>").addClass('bubble bubble_default left').appendTo($l4);
+  		var $l6 = $("<div/>").addClass('bubble_cont').appendTo($l5);
+  		var $l7 = $("<div/>").addClass('plain').appendTo($l6);
+	  	var dt = new Date().getHours();
+	  	console.log(dt);
+	  	var texthello = "";
+	  	if(dt<6 && dt<12){
+			texthello = "上午好";
+		}
+	  	else if(dt>12 && dt <18){
+			texthello = "下午好";
+		}
+	  	else{
+			texthello = "晚上好";
+		}
+  		var $l8 = $("<pre/>").text(texthello).appendTo($l7);
+  		send('0');
   });
   function clicked(){
   	var i = $(this).attr('val');
@@ -38,8 +57,7 @@
   		var $a6 = $("<div/>").addClass('bubble_cont').appendTo($a5);
   		var $a7 = $("<div/>").addClass('plain').appendTo($a6);
   		var $a8 = $("<pre/>").text(data.text).appendTo($a7);
-			$a8.wrap("<a style='text-decoration:None' href="+data.source+"></a>>");
-
+		$a8.wrap("<a style='text-decoration:None' href="+data.source+"></a>");
   		var $a9 = $("<div/>").addClass('message me').appendTo('.box_bd');
   		var $a10 = $("<div/>").addClass('content').appendTo($a9);
   		var $a11 = $("<div/>").addClass('bubble bubble_primary choose blue').click(clicked).attr('val','1').appendTo($a10);
